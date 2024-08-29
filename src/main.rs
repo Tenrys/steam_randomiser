@@ -5,6 +5,7 @@ use std::{
     path::{Path, PathBuf},
     process::{Child, Stdio},
 };
+use keyvalues_parser::{Value, Vdf};
 
 #[cfg(target_os = "linux")]
 const FLATPAK_APPLICATIONS_PATH: &str = ".var/app/com.valvesoftware.Steam/data/Steam";
@@ -84,18 +85,26 @@ fn get_other_install_dirs(path: &Path) -> Vec<String> {
 
     let path = path.as_path();
 
-    let contents = std::fs::read_to_string(path);
-    let lines = contents.unwrap();
+    let contents = std::fs::read_to_string(path).unwrap();
 
     let mut libs = Vec::new();
 
-    let lines = lines.lines();
-    for line in lines {
-        if line.contains("path") {
-            let splitted: Vec<&str> = line.split_whitespace().collect();
-            libs.push(splitted[1][1..splitted[1].len() - 1].to_string());
+    let vdf = Vdf::parse(&contents).unwrap();
+
+    let folders = vdf.value.unwrap_obj();
+    for data in folders.values() {
+        if let Some(Value::Obj(obj)) = data.get(0) {
+            if let Some(path) = obj.get("path") {
+                let path_str = path.get(0).unwrap()
+                    .to_string()
+                    .strip_prefix('"').unwrap()
+                    .strip_suffix('"').unwrap()
+                    .replace("\\\\", "\\");
+                libs.push(path_str);
+            }
         }
     }
+
     libs
 }
 
@@ -227,7 +236,7 @@ fn run(steam_type: SteamKind, id: &str) -> std::io::Result<Child> {
     Ok(child)
 }
 
-/// Launche the game from its id using the appropriate Steam environment
+/// Launch the game from its id using the appropriate Steam environment
 #[cfg(target_os = "windows")]
 fn run(steam_type: SteamKind, id: &str) -> std::io::Result<Child> {
     let child = match steam_type {
