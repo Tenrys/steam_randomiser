@@ -1,0 +1,45 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug executable 'steam_randomiser'",
+			"cargo": {
+				"args": [
+					"build",
+					"--bin=steam_randomiser",
+					"--package=steam_randomiser"
+				],
+				"filter": {
+					"name": "steam_randomiser",
+					"kind": "bin"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug unit tests in executable 'steam_randomiser'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--bin=steam_randomiser",
+					"--package=steam_randomiser"
+				],
+				"filter": {
+					"name": "steam_randomiser",
+					"kind": "bin"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		}
+	]
+}
